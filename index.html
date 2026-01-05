@@ -134,13 +134,12 @@
             };
 
             // --- Derived State ---
-            const currentAnimals = useMemo(() => animals.filter(a => a.cohort === currentCohort), [animals, currentCohort]);
-            const stats = useMemo(() => {
+            const getCohortStats = (cohortAnimals) => {
                 const result = {};
                 groupNames.forEach(g => {
                     result[g] = {};
                     ages.forEach(age => {
-                        const count = currentAnimals.filter(a => a.group === g && a.tests[age]).length;
+                        const count = cohortAnimals.filter(a => a.group === g && a.tests[age]).length;
                         result[g][age] = {
                             tested: count,
                             missing: Math.max(0, minRequired - count),
@@ -149,7 +148,9 @@
                     });
                 });
                 return result;
-            }, [currentAnimals, minRequired, groupNames]);
+            };
+
+            const currentAnimals = useMemo(() => animals.filter(a => a.cohort === currentCohort), [animals, currentCohort]);
 
             // --- Actions ---
             const addAnimal = () => {
@@ -280,6 +281,50 @@
                             </div>
                         </div>
 
+                        {/* Récapitulatif Global */}
+                        <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
+                            <h2 className="text-lg font-bold mb-4">📊 Récapitulatif Global</h2>
+                            <div className="space-y-8">
+                                {cohorts.map(c => {
+                                    const cAnimals = animals.filter(a => a.cohort === c);
+                                    const cStats = getCohortStats(cAnimals);
+                                    return (
+                                        <div key={c} className="border-b last:border-0 pb-6 last:pb-0">
+                                            <h3 className="font-bold text-md mb-3 text-blue-800 bg-blue-50 px-3 py-1 rounded inline-block">{c}</h3>
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse text-sm">
+                                                    <thead>
+                                                        <tr className="bg-gray-100">
+                                                            <th className="border p-2 text-left">Groupe</th>
+                                                            {ages.map(a => <th key={a} className="border p-2 text-center" colSpan="2">{a}</th>)}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {groupNames.map(g => (
+                                                            <tr key={g} className="hover:bg-gray-50">
+                                                                <td className="border p-2 font-medium">{g}</td>
+                                                                {ages.map(a => {
+                                                                    const d = cStats[g][a];
+                                                                    return (
+                                                                        <React.Fragment key={a}>
+                                                                            <td className={`border p-2 text-center ${d.status === 'complete' ? 'bg-green-50 text-green-700' : d.status === 'partial' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                                                                                <div className="flex justify-center gap-1">{getStatusIcon(d.status)} <b>{d.tested}</b></div>
+                                                                            </td>
+                                                                            <td className={`border p-2 text-center font-bold ${d.missing === 0 ? 'text-green-600' : 'text-red-500'}`}>{d.missing}</td>
+                                                                        </React.Fragment>
+                                                                    );
+                                                                })}
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
                         {/* Config */}
                         <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
                             <div className="flex justify-between items-center mb-4">
@@ -306,36 +351,7 @@
                             )}
                         </div>
 
-                        {/* Synthèse */}
-                        <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6 overflow-x-auto">
-                            <h2 className="text-lg font-bold mb-4">📊 Synthèse - {currentCohort}</h2>
-                            <table className="w-full border-collapse text-sm">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border p-2 text-left">Groupe</th>
-                                        {ages.map(a => <th key={a} className="border p-2 text-center" colSpan="2">{a}</th>)}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {groupNames.map(g => (
-                                        <tr key={g} className="hover:bg-gray-50">
-                                            <td className="border p-2 font-medium">{g}</td>
-                                            {ages.map(a => {
-                                                const d = stats[g][a];
-                                                return (
-                                                    <React.Fragment key={a}>
-                                                        <td className={`border p-2 text-center ${d.status === 'complete' ? 'bg-green-50 text-green-700' : d.status === 'partial' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
-                                                            <div className="flex justify-center gap-1">{getStatusIcon(d.status)} <b>{d.tested}</b></div>
-                                                        </td>
-                                                        <td className={`border p-2 text-center font-bold ${d.missing === 0 ? 'text-green-600' : 'text-red-500'}`}>{d.missing}</td>
-                                                    </React.Fragment>
-                                                );
-                                            })}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+
 
                         {/* Ajout */}
                         <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
