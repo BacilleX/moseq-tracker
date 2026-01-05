@@ -215,6 +215,25 @@
 
             const exportExcel = () => {
                 const wb = XLSX.utils.book_new();
+
+                // 1. Sheet Récapitulatif
+                const recapData = [];
+                cohorts.forEach(c => {
+                    const cAnimals = animals.filter(a => a.cohort === c);
+                    const cStats = getCohortStats(cAnimals);
+                    groupNames.forEach(g => {
+                        const row = { 'Cohorte': c, 'Groupe': g };
+                        ages.forEach(age => {
+                            const d = cStats[g][age];
+                            row[`${age} (Testés)`] = d.tested;
+                            row[`${age} (Manquants)`] = d.missing;
+                        });
+                        recapData.push(row);
+                    });
+                });
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(recapData), "Récapitulatif");
+
+                // 2. Sheets par Cohorte
                 cohorts.forEach(c => {
                     const list = animals.filter(a => a.cohort === c).map(a => ({
                         'ID': a.name, 'Genotype': a.genotype, 'Groupe': a.group,
@@ -297,13 +316,38 @@
                             <div className="flex items-center gap-3">
                                 <label className="font-medium text-gray-700">Objectif :</label>
                                 <input type="number" value={minRequired} onChange={e => updateAndSave({ minRequired: parseInt(e.target.value) || 1 })} className="w-16 border rounded text-center font-bold p-2" />
-                                <span className="text-gray-500">animaux / groupe (7 animaux pour 6 groupes produit 1 million de frames)</span>
+                                <span className="text-gray-500">animaux / groupe</span>
                             </div>
                             {showSettings && (
                                 <div className="mt-4 grid md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
                                     <div>
                                         <h3 className="font-bold mb-2 text-sm">Groupes</h3>
-                                        <div className="space-y-1">{groupNames.map((g, i) => <input key={i} value={g} onChange={e => { const n = [...groupNames]; n[i] = e.target.value; updateAndSave({ groupNames: n }); }} className="w-full border px-2 py-1 rounded text-sm" />)}</div>
+                                        <div className="space-y-1">
+                                            {groupNames.map((g, i) => (
+                                                <div key={i} className="flex gap-1">
+                                                    <input
+                                                        value={g}
+                                                        onChange={e => { const n = [...groupNames]; n[i] = e.target.value; updateAndSave({ groupNames: n }); }}
+                                                        className="w-full border px-2 py-1 rounded text-sm"
+                                                    />
+                                                    {groupNames.length > 1 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (confirm(`Supprimer le groupe "${g}" ?`)) {
+                                                                    const n = groupNames.filter((_, idx) => idx !== i);
+                                                                    updateAndSave({ groupNames: n });
+                                                                }
+                                                            }}
+                                                            className="text-red-500 hover:bg-red-50 px-2 rounded"
+                                                            title="Supprimer"
+                                                        >
+                                                            &times;
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button onClick={() => updateAndSave({ groupNames: [...groupNames, `Groupe ${groupNames.length + 1}`] })} className="text-xs text-blue-600 mt-2">+ Ajouter un groupe</button>
                                     </div>
                                     <div>
                                         <h3 className="font-bold mb-2 text-sm">Génotypes</h3>
