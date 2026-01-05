@@ -270,12 +270,15 @@
                         <div className="bg-white p-4 rounded-lg shadow mb-6 flex items-center gap-3 overflow-x-auto">
                             <span className="font-bold text-sm text-gray-500 uppercase shrink-0">Cohortes</span>
                             {cohorts.map(c => (
-                                <button key={c} onClick={() => updateAndSave({ currentCohort: c })} onDoubleClick={() => renameCohort(c)} title="Double-cliquez pour renommer" className={`px-4 py-1.5 rounded-full text-sm font-medium transition shrink-0 ${currentCohort === c ? 'bg-blue-100 text-blue-800 ring-2 ring-blue-500' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                                <button key={c} onClick={() => updateAndSave({ currentCohort: c })} className={`px-4 py-1.5 rounded-full text-sm font-medium transition shrink-0 ${currentCohort === c ? 'bg-blue-100 text-blue-800 ring-2 ring-blue-500' : 'bg-gray-100 hover:bg-gray-200'}`}>
                                     {c}
                                 </button>
                             ))}
-                            <button onClick={addCohort} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center shrink-0"><Plus className="w-5 h-5 text-gray-600" /></button>
-                            {currentCohort !== cohorts[0] && <button onClick={() => removeCohort(currentCohort)} className="text-xs text-red-500 hover:underline shrink-0 ml-auto">Supprimer</button>}
+                            <button onClick={addCohort} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center shrink-0" title="Nouvelle cohorte"><Plus className="w-5 h-5 text-gray-600" /></button>
+                            <div className="ml-auto flex gap-2">
+                                <button onClick={() => renameCohort(currentCohort)} className="text-xs text-blue-600 hover:underline shrink-0">Renommer</button>
+                                {cohorts.length > 1 && <button onClick={() => removeCohort(currentCohort)} className="text-xs text-red-500 hover:underline shrink-0">Supprimer</button>}
+                            </div>
                         </div>
 
                         {/* Config */}
