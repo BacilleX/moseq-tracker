@@ -43,7 +43,7 @@
             const [groupNames, setGroupNames] = useState(['Groupe 1', 'Groupe 2', 'Groupe 3', 'Groupe 4', 'Groupe 5', 'Groupe 6']);
             const [genotypes, setGenotypes] = useState(['Génotype 1', 'Génotype 2']);
 
-            const [newAnimal, setNewAnimal] = useState({ name: '', customId: '', genotype: 0, group: 0 });
+            const [newAnimal, setNewAnimal] = useState({ name: '', genotype: 0, group: 0 });
             const [isLoading, setIsLoading] = useState(true);
             const [isSaving, setIsSaving] = useState(false);
             const [syncStatus, setSyncStatus] = useState('');
@@ -158,14 +158,13 @@
                     animals: [...animals, {
                         id: Date.now(),
                         name: newAnimal.name.trim(),
-                        customId: newAnimal.customId.trim(),
                         genotype: genotypes[newAnimal.genotype],
                         group: groupNames[newAnimal.group],
                         cohort: currentCohort,
                         tests: { '4 mois': false, '5 mois': false, '6 mois': false }
                     }]
                 });
-                setNewAnimal({ ...newAnimal, name: '', customId: '' });
+                setNewAnimal({ ...newAnimal, name: '' });
             };
 
             const toggleTest = (id, age) => {
@@ -215,7 +214,7 @@
                 const wb = XLSX.utils.book_new();
                 cohorts.forEach(c => {
                     const list = animals.filter(a => a.cohort === c).map(a => ({
-                        'ID': a.name, 'ID Perso': a.customId, 'Genotype': a.genotype, 'Groupe': a.group,
+                        'ID': a.name, 'Genotype': a.genotype, 'Groupe': a.group,
                         '4 mois': a.tests['4 mois'] ? 'Oui' : 'Non',
                         '5 mois': a.tests['5 mois'] ? 'Oui' : 'Non',
                         '6 mois': a.tests['6 mois'] ? 'Oui' : 'Non'
@@ -341,9 +340,8 @@
                         {/* Ajout */}
                         <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
                             <h2 className="text-lg font-bold mb-4">➕ Ajouter un animal</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <input placeholder="ID" value={newAnimal.name} onChange={e => setNewAnimal({ ...newAnimal, name: e.target.value })} className="border p-2 rounded col-span-1" onKeyPress={e => e.key === 'Enter' && addAnimal()} />
-                                <input placeholder="ID Perso" value={newAnimal.customId} onChange={e => setNewAnimal({ ...newAnimal, customId: e.target.value })} className="border p-2 rounded col-span-1" onKeyPress={e => e.key === 'Enter' && addAnimal()} />
                                 <select value={newAnimal.genotype} onChange={e => setNewAnimal({ ...newAnimal, genotype: parseInt(e.target.value) })} className="border p-2 rounded">{genotypes.map((g, i) => <option key={i} value={i}>{g}</option>)}</select>
                                 <select value={newAnimal.group} onChange={e => setNewAnimal({ ...newAnimal, group: parseInt(e.target.value) })} className="border p-2 rounded">{groupNames.map((g, i) => <option key={i} value={i}>{g}</option>)}</select>
                                 <button onClick={addAnimal} className="bg-blue-600 text-white font-bold p-2 rounded hover:bg-blue-700 col-span-2 md:col-span-1">Ajouter</button>
@@ -358,7 +356,6 @@
                                     <thead>
                                         <tr className="bg-gray-100">
                                             <th className="border p-2 text-left">ID</th>
-                                            <th className="border p-2 text-left">Perso</th>
                                             <th className="border p-2 text-center">Geno</th>
                                             <th className="border p-2 text-left">Groupe</th>
                                             {ages.map(a => <th key={a} className="border p-2 text-center">{a}</th>)}
@@ -369,7 +366,6 @@
                                         {currentAnimals.map(a => (
                                             <tr key={a.id} className="hover:bg-gray-50">
                                                 <td className="border p-2 font-medium">{a.name}</td>
-                                                <td className="border p-2 text-gray-500">{a.customId}</td>
                                                 <td className="border p-2 text-center"><span className="bg-gray-100 px-2 py-0.5 rounded text-xs">{a.genotype}</span></td>
                                                 <td className="border p-2">{a.group}</td>
                                                 {ages.map(age => (
