@@ -187,6 +187,19 @@
                 }
             };
 
+            const renameCohort = (oldName) => {
+                const newName = prompt("Nouveau nom :", oldName);
+                if (newName && newName.trim() !== oldName && !cohorts.includes(newName.trim())) {
+                    const newCohorts = cohorts.map(c => c === oldName ? newName.trim() : c);
+                    const newAnimals = animals.map(a => a.cohort === oldName ? { ...a, cohort: newName.trim() } : a);
+                    updateAndSave({
+                        cohorts: newCohorts,
+                        animals: newAnimals,
+                        currentCohort: currentCohort === oldName ? newName.trim() : currentCohort
+                    });
+                }
+            };
+
             const removeCohort = (c) => {
                 if (cohorts.length > 1 && confirm(`Supprimer ${c} et tous ses animaux ?`)) {
                     const newC = cohorts.filter(x => x !== c);
@@ -257,7 +270,7 @@
                         <div className="bg-white p-4 rounded-lg shadow mb-6 flex items-center gap-3 overflow-x-auto">
                             <span className="font-bold text-sm text-gray-500 uppercase shrink-0">Cohortes</span>
                             {cohorts.map(c => (
-                                <button key={c} onClick={() => updateAndSave({ currentCohort: c })} className={`px-4 py-1.5 rounded-full text-sm font-medium transition shrink-0 ${currentCohort === c ? 'bg-blue-100 text-blue-800 ring-2 ring-blue-500' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                                <button key={c} onClick={() => updateAndSave({ currentCohort: c })} onDoubleClick={() => renameCohort(c)} title="Double-cliquez pour renommer" className={`px-4 py-1.5 rounded-full text-sm font-medium transition shrink-0 ${currentCohort === c ? 'bg-blue-100 text-blue-800 ring-2 ring-blue-500' : 'bg-gray-100 hover:bg-gray-200'}`}>
                                     {c}
                                 </button>
                             ))}
