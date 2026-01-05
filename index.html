@@ -152,6 +152,7 @@
             };
 
             const currentAnimals = useMemo(() => animals.filter(a => a.cohort === currentCohort), [animals, currentCohort]);
+            const currentStats = useMemo(() => getCohortStats(currentAnimals), [currentAnimals, minRequired, groupNames]);
 
             // --- Actions ---
             const addAnimal = () => {
@@ -276,6 +277,9 @@
                                 </button>
                             ))}
                             <button onClick={addCohort} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center shrink-0" title="Nouvelle cohorte"><Plus className="w-5 h-5 text-gray-600" /></button>
+                            <button onClick={() => setShowRecap(true)} className="ml-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-sm font-medium hover:bg-indigo-100 flex items-center gap-1 shrink-0">
+                                📊 Vue globale
+                            </button>
                             <div className="ml-auto flex gap-2">
                                 <button onClick={() => renameCohort(currentCohort)} className="text-xs text-blue-600 hover:underline shrink-0">Renommer</button>
                                 {cohorts.length > 1 && <button onClick={() => removeCohort(currentCohort)} className="text-xs text-red-500 hover:underline shrink-0">Supprimer</button>}
@@ -311,6 +315,37 @@
                         </div>
 
 
+
+                        {/* Synthèse Courante */}
+                        <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6 overflow-x-auto">
+                            <h2 className="text-lg font-bold mb-4">📊 Synthèse - {currentCohort}</h2>
+                            <table className="w-full border-collapse text-sm">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="border p-2 text-left">Groupe</th>
+                                        {ages.map(a => <th key={a} className="border p-2 text-center" colSpan="2">{a}</th>)}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {groupNames.map(g => (
+                                        <tr key={g} className="hover:bg-gray-50">
+                                            <td className="border p-2 font-medium">{g}</td>
+                                            {ages.map(a => {
+                                                const d = currentStats[g][a];
+                                                return (
+                                                    <React.Fragment key={a}>
+                                                        <td className={`border p-2 text-center ${d.status === 'complete' ? 'bg-green-50 text-green-700' : d.status === 'partial' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                                                            <div className="flex justify-center gap-1">{getStatusIcon(d.status)} <b>{d.tested}</b></div>
+                                                        </td>
+                                                        <td className={`border p-2 text-center font-bold ${d.missing === 0 ? 'text-green-600' : 'text-red-500'}`}>{d.missing}</td>
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
                         {/* Ajout */}
                         <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
@@ -356,58 +391,59 @@
                             )}
                         </div>
 
-                        {/* Récapitulatif Global */}
-                        <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
-                            <button
-                                onClick={() => setShowRecap(!showRecap)}
-                                className="w-full flex justify-between items-center text-lg font-bold text-gray-800 hover:text-blue-600 transition"
-                            >
-                                <span>📊 Récapitulatif Global</span>
-                                <span className="text-sm bg-gray-100 px-3 py-1 rounded-full">{showRecap ? 'Masquer ▲' : 'Afficher ▼'}</span>
-                            </button>
 
-                            {showRecap && (
-                                <div className="space-y-8 mt-6 animate-fade-in">
-                                    {cohorts.map(c => {
-                                        const cAnimals = animals.filter(a => a.cohort === c);
-                                        const cStats = getCohortStats(cAnimals);
-                                        return (
-                                            <div key={c} className="border-b last:border-0 pb-6 last:pb-0">
-                                                <h3 className="font-bold text-md mb-3 text-blue-800 bg-blue-50 px-3 py-1 rounded inline-block">{c}</h3>
-                                                <div className="overflow-x-auto">
-                                                    <table className="w-full border-collapse text-sm">
-                                                        <thead>
-                                                            <tr className="bg-gray-100">
-                                                                <th className="border p-2 text-left">Groupe</th>
-                                                                {ages.map(a => <th key={a} className="border p-2 text-center" colSpan="2">{a}</th>)}
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {groupNames.map(g => (
-                                                                <tr key={g} className="hover:bg-gray-50">
-                                                                    <td className="border p-2 font-medium">{g}</td>
-                                                                    {ages.map(a => {
-                                                                        const d = cStats[g][a];
-                                                                        return (
-                                                                            <React.Fragment key={a}>
-                                                                                <td className={`border p-2 text-center ${d.status === 'complete' ? 'bg-green-50 text-green-700' : d.status === 'partial' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
-                                                                                    <div className="flex justify-center gap-1">{getStatusIcon(d.status)} <b>{d.tested}</b></div>
-                                                                                </td>
-                                                                                <td className={`border p-2 text-center font-bold ${d.missing === 0 ? 'text-green-600' : 'text-red-500'}`}>{d.missing}</td>
-                                                                            </React.Fragment>
-                                                                        );
-                                                                    })}
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                        {/* Modal Récapitulatif Global */}
+                        {showRecap && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                                <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+                                    <div className="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
+                                        <h2 className="text-xl font-bold text-gray-800">📊 Récapitulatif Global</h2>
+                                        <button onClick={() => setShowRecap(false)} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+                                    </div>
+                                    <div className="p-6 overflow-y-auto">
+                                        <div className="space-y-8">
+                                            {cohorts.map(c => {
+                                                const cAnimals = animals.filter(a => a.cohort === c);
+                                                const cStats = getCohortStats(cAnimals);
+                                                return (
+                                                    <div key={c} className="border-b last:border-0 pb-6 last:pb-0">
+                                                        <h3 className="font-bold text-md mb-3 text-blue-800 bg-blue-50 px-3 py-1 rounded inline-block">{c}</h3>
+                                                        <div className="overflow-x-auto">
+                                                            <table className="w-full border-collapse text-sm">
+                                                                <thead>
+                                                                    <tr className="bg-gray-100">
+                                                                        <th className="border p-2 text-left">Groupe</th>
+                                                                        {ages.map(a => <th key={a} className="border p-2 text-center" colSpan="2">{a}</th>)}
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {groupNames.map(g => (
+                                                                        <tr key={g} className="hover:bg-gray-50">
+                                                                            <td className="border p-2 font-medium">{g}</td>
+                                                                            {ages.map(a => {
+                                                                                const d = cStats[g][a];
+                                                                                return (
+                                                                                    <React.Fragment key={a}>
+                                                                                        <td className={`border p-2 text-center ${d.status === 'complete' ? 'bg-green-50 text-green-700' : d.status === 'partial' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                                                                                            <div className="flex justify-center gap-1">{getStatusIcon(d.status)} <b>{d.tested}</b></div>
+                                                                                        </td>
+                                                                                        <td className={`border p-2 text-center font-bold ${d.missing === 0 ? 'text-green-600' : 'text-red-500'}`}>{d.missing}</td>
+                                                                                    </React.Fragment>
+                                                                                );
+                                                                            })}
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
