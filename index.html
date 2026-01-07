@@ -33,10 +33,22 @@
         const Plus = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>);
         const Settings = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>);
         const Cloud = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>);
+        const Lock = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>);
+        const Unlock = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>);
+
+        // --- Utils SHA-256 ---
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
 
         // --- Application Principale ---
         const App = () => {
             const ages = ['4 mois', '5 mois', '6 mois'];
+            const PASSWORD_HASH = "9fb1a9540ac5aaa2b954a423d7584755a709a1561b044719925411cbd92d999a"; // "moseq"
 
             // --- State ---
             const [animals, setAnimals] = useState([]);
@@ -52,6 +64,10 @@
             const [syncStatus, setSyncStatus] = useState('');
             const [showSettings, setShowSettings] = useState(false);
             const [showRecap, setShowRecap] = useState(false);
+            const [isLocked, setIsLocked] = useState(true);
+            const [showUnlockModal, setShowUnlockModal] = useState(false);
+            const [passwordInput, setPasswordInput] = useState('');
+            const [unlockError, setUnlockError] = useState('');
 
             const getDefaultData = () => ({
                 animals: [],
@@ -249,6 +265,23 @@
                 XLSX.writeFile(wb, `moseq_${new Date().toISOString().split('T')[0]}.xlsx`);
             };
 
+            const handleUnlock = async () => {
+                const hash = await sha256(passwordInput);
+                if (hash === PASSWORD_HASH) {
+                    setIsLocked(false);
+                    setShowUnlockModal(false);
+                    setPasswordInput('');
+                    setUnlockError('');
+                } else {
+                    setUnlockError('Mot de passe incorrect');
+                }
+            };
+
+            const lockApp = () => {
+                setIsLocked(true);
+                setShowSettings(false);
+            };
+
             const getStatusIcon = (status) => {
                 if (status === 'complete') return <CheckCircle className="w-5 h-5 text-green-500" />;
                 if (status === 'partial') return <AlertCircle className="w-5 h-5 text-yellow-500" />;
@@ -281,9 +314,20 @@
                                 {syncStatus && <p className="text-sm text-blue-600 mt-1">{syncStatus}</p>}
                             </div>
                             <div className="flex gap-2 flex-wrap">
-                                <button onClick={() => saveData()} disabled={isSaving} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50">
-                                    {isSaving ? '...' : '☁️ Sync'}
-                                </button>
+                                {isLocked ? (
+                                    <button onClick={() => setShowUnlockModal(true)} className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-medium flex items-center gap-1">
+                                        <Lock className="w-4 h-4" /> Déverrouiller
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button onClick={lockApp} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 font-medium flex items-center gap-1">
+                                            <Unlock className="w-4 h-4" /> Verrouiller
+                                        </button>
+                                        <button onClick={() => saveData()} disabled={isSaving} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50">
+                                            {isSaving ? '...' : '☁️ Sync'}
+                                        </button>
+                                    </>
+                                )}
                                 <button onClick={exportExcel} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center gap-1">
                                     <Download className="w-4 h-4" /> Excel
                                 </button>
@@ -298,13 +342,19 @@
                                     {c}
                                 </button>
                             ))}
-                            <button onClick={addCohort} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center shrink-0" title="Nouvelle cohorte"><Plus className="w-5 h-5 text-gray-600" /></button>
+                            {!isLocked && (
+                                <button onClick={addCohort} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center shrink-0" title="Nouvelle cohorte"><Plus className="w-5 h-5 text-gray-600" /></button>
+                            )}
                             <button onClick={() => setShowRecap(true)} className="ml-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-sm font-medium hover:bg-indigo-100 flex items-center gap-1 shrink-0">
                                 📊 Vue globale
                             </button>
                             <div className="ml-auto flex gap-2">
-                                <button onClick={() => renameCohort(currentCohort)} className="text-xs text-blue-600 hover:underline shrink-0">Renommer</button>
-                                {cohorts.length > 1 && <button onClick={() => removeCohort(currentCohort)} className="text-xs text-red-500 hover:underline shrink-0">Supprimer</button>}
+                                {!isLocked && (
+                                    <>
+                                        <button onClick={() => renameCohort(currentCohort)} className="text-xs text-blue-600 hover:underline shrink-0">Renommer</button>
+                                        {cohorts.length > 1 && <button onClick={() => removeCohort(currentCohort)} className="text-xs text-red-500 hover:underline shrink-0">Supprimer</button>}
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -318,7 +368,7 @@
                             </div>
                             <div className="flex items-center gap-3">
                                 <label className="font-medium text-gray-700">Objectif :</label>
-                                <input type="number" value={minRequired} onChange={e => updateAndSave({ minRequired: parseInt(e.target.value) || 1 })} className="w-16 border rounded text-center font-bold p-2" />
+                                <input disabled={isLocked} type="number" value={minRequired} onChange={e => updateAndSave({ minRequired: parseInt(e.target.value) || 1 })} className="w-16 border rounded text-center font-bold p-2 disabled:bg-gray-100 disabled:text-gray-500" />
                                 <span className="text-gray-500">animaux / groupe</span>
                             </div>
                             {showSettings && (
@@ -329,9 +379,10 @@
                                             {groupNames.map((g, i) => (
                                                 <div key={i} className="flex gap-1">
                                                     <input
+                                                        disabled={isLocked}
                                                         value={g}
                                                         onChange={e => { const n = [...groupNames]; n[i] = e.target.value; updateAndSave({ groupNames: n }); }}
-                                                        className="w-full border px-2 py-1 rounded text-sm"
+                                                        className="w-full border px-2 py-1 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500"
                                                     />
                                                     {groupNames.length > 1 && (
                                                         <button
@@ -350,12 +401,12 @@
                                                 </div>
                                             ))}
                                         </div>
-                                        <button onClick={() => updateAndSave({ groupNames: [...groupNames, `Groupe ${groupNames.length + 1}`] })} className="text-xs text-blue-600 mt-2">+ Ajouter un groupe</button>
+                                        {!isLocked && <button onClick={() => updateAndSave({ groupNames: [...groupNames, `Groupe ${groupNames.length + 1}`] })} className="text-xs text-blue-600 mt-2">+ Ajouter un groupe</button>}
                                     </div>
                                     <div>
                                         <h3 className="font-bold mb-2 text-sm">Génotypes</h3>
-                                        <div className="space-y-1">{genotypes.map((g, i) => <input key={i} value={g} onChange={e => { const n = [...genotypes]; n[i] = e.target.value; updateAndSave({ genotypes: n }); }} className="w-full border px-2 py-1 rounded text-sm" />)}</div>
-                                        <button onClick={() => updateAndSave({ genotypes: [...genotypes, `G${genotypes.length + 1}`] })} className="text-xs text-blue-600 mt-2">+ Ajouter</button>
+                                        <div className="space-y-1">{genotypes.map((g, i) => <input key={i} disabled={isLocked} value={g} onChange={e => { const n = [...genotypes]; n[i] = e.target.value; updateAndSave({ genotypes: n }); }} className="w-full border px-2 py-1 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" />)}</div>
+                                        {!isLocked && <button onClick={() => updateAndSave({ genotypes: [...genotypes, `G${genotypes.length + 1}`] })} className="text-xs text-blue-600 mt-2">+ Ajouter</button>}
                                     </div>
                                 </div>
                             )}
@@ -395,15 +446,17 @@
                         </div>
 
                         {/* Ajout */}
-                        <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
-                            <h2 className="text-lg font-bold mb-4">➕ Ajouter un animal</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <input placeholder="ID" value={newAnimal.name} onChange={e => setNewAnimal({ ...newAnimal, name: e.target.value })} className="border p-2 rounded col-span-1" onKeyPress={e => e.key === 'Enter' && addAnimal()} />
-                                <select value={newAnimal.genotype} onChange={e => setNewAnimal({ ...newAnimal, genotype: parseInt(e.target.value) })} className="border p-2 rounded">{genotypes.map((g, i) => <option key={i} value={i}>{g}</option>)}</select>
-                                <select value={newAnimal.group} onChange={e => setNewAnimal({ ...newAnimal, group: parseInt(e.target.value) })} className="border p-2 rounded">{groupNames.map((g, i) => <option key={i} value={i}>{g}</option>)}</select>
-                                <button onClick={addAnimal} className="bg-blue-600 text-white font-bold p-2 rounded hover:bg-blue-700 col-span-2 md:col-span-1">Ajouter</button>
+                        {!isLocked && (
+                            <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
+                                <h2 className="text-lg font-bold mb-4">➕ Ajouter un animal</h2>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    <input placeholder="ID" value={newAnimal.name} onChange={e => setNewAnimal({ ...newAnimal, name: e.target.value })} className="border p-2 rounded col-span-1" onKeyPress={e => e.key === 'Enter' && addAnimal()} />
+                                    <select value={newAnimal.genotype} onChange={e => setNewAnimal({ ...newAnimal, genotype: parseInt(e.target.value) })} className="border p-2 rounded">{genotypes.map((g, i) => <option key={i} value={i}>{g}</option>)}</select>
+                                    <select value={newAnimal.group} onChange={e => setNewAnimal({ ...newAnimal, group: parseInt(e.target.value) })} className="border p-2 rounded">{groupNames.map((g, i) => <option key={i} value={i}>{g}</option>)}</select>
+                                    <button onClick={addAnimal} className="bg-blue-600 text-white font-bold p-2 rounded hover:bg-blue-700 col-span-2 md:col-span-1">Ajouter</button>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Liste */}
                         <div className="bg-white p-4 md:p-6 rounded-lg shadow overflow-x-auto">
@@ -416,7 +469,7 @@
                                             <th className="border p-2 text-center">Geno</th>
                                             <th className="border p-2 text-left">Groupe</th>
                                             {ages.map(a => <th key={a} className="border p-2 text-center">{a}</th>)}
-                                            <th className="border p-2 text-center">🗑️</th>
+                                            {!isLocked && <th className="border p-2 text-center">🗑️</th>}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -427,10 +480,10 @@
                                                 <td className="border p-2">{a.group}</td>
                                                 {ages.map(age => (
                                                     <td key={age} className="border p-2 text-center">
-                                                        <button onClick={() => toggleTest(a.id, age)} className={`w-6 h-6 rounded ${a.tests[age] ? 'bg-green-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}>{a.tests[age] && '✓'}</button>
+                                                        <button disabled={isLocked} onClick={() => toggleTest(a.id, age)} className={`w-6 h-6 rounded ${a.tests[age] ? 'bg-green-500 text-white' : 'bg-gray-200 hover:bg-gray-300'} disabled:opacity-50 disabled:cursor-not-allowed`}>{a.tests[age] && '✓'}</button>
                                                     </td>
                                                 ))}
-                                                <td className="border p-2 text-center"><button onClick={() => deleteAnimal(a.id)} className="text-red-500 hover:text-red-700 font-bold">✕</button></td>
+                                                {!isLocked && <td className="border p-2 text-center"><button onClick={() => deleteAnimal(a.id)} className="text-red-500 hover:text-red-700 font-bold">✕</button></td>}
                                             </tr>
                                         ))}
                                     </tbody>
@@ -487,6 +540,37 @@
                                                 );
                                             })}
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Modal Unlock */}
+                        {showUnlockModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                                <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative">
+                                    <button onClick={() => setShowUnlockModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold">&times;</button>
+                                    <div className="text-center mb-6">
+                                        <div className="w-16 h-16 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Lock className="w-8 h-8" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-800">Déverrouillage</h3>
+                                        <p className="text-gray-500 text-sm mt-1">Entrez le mot de passe pour modifier</p>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <input
+                                            type="password"
+                                            value={passwordInput}
+                                            onChange={e => setPasswordInput(e.target.value)}
+                                            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="Mot de passe"
+                                            onKeyPress={e => e.key === 'Enter' && handleUnlock()}
+                                            autoFocus
+                                        />
+                                        {unlockError && <p className="text-red-500 text-sm font-medium text-center">{unlockError}</p>}
+                                        <button onClick={handleUnlock} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">
+                                            Déverrouiller
+                                        </button>
                                     </div>
                                 </div>
                             </div>
