@@ -73,8 +73,8 @@
                     combined
                 );
 
-                const data = JSON.parse(new TextDecoder().decode(decrypted));
-                return { ...data, binId: PUBLIC_BIN_ID };
+                const config = JSON.parse(new TextDecoder().decode(decrypted));
+                return { ...config, binId: PUBLIC_BIN_ID };
             } catch (e) {
                 console.error("Decryption failed:", e);
                 return null;
