@@ -22,10 +22,11 @@
         const { useState, useMemo, useEffect, useCallback } = React;
 
         // --- Sécurité & Configuration (Chiffré) ---
-        const ENCRYPTED_CFG = "4D+k8M+xoOOtNrxAxlgODh+JgGbTm+y9sfePWkzNtl3PWwpiRN/XltCqf+crnv4ImeUpim57gbhsq+oKjzzdL+b37ZilMlKFRZCF9+xZ+12mto6VHZ46eJacZgxQBRIZpItHRG7jrKCnQ0xL";
-        const AUTH_TAG = "LFfXk3Gc4Oq0yRhVmq2Tdg==";
-        const SALT = "vM9PUwLVUHOoKCVx2pQ1tg==";
-        const IV_BASE64 = "UnEGk8r3anJ0DQGm";
+        const PUBLIC_BIN_ID = "6962e441ae596e708fd36ea2"; // Lecture OK (Public)
+        const ENCRYPTED_CFG = "jTE4XLGqHYCisW2VMh8Mhp5ZJgJAJYvR38kaoVovC34oB9vHu0rxi0CnGgTI9WpgnjRJbMYKQxED3ZaXNUtn9b9r586W0bKSnQ=="; // Seule la clé API est chiffrée
+        const AUTH_TAG = "+q3p82q8kx77mj9Oryw6ZA==";
+        const SALT = "3sT8+QzctutqrLpmN1rZMA==";
+        const IV_BASE64 = "HhxitDGX03DeALeY";
 
         // --- Composants SVG ---
         const CheckCircle = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
@@ -72,7 +73,8 @@
                     combined
                 );
 
-                return JSON.parse(new TextDecoder().decode(decrypted));
+                const data = JSON.parse(new TextDecoder().decode(decrypted));
+                return { ...data, binId: PUBLIC_BIN_ID };
             } catch (e) {
                 console.error("Decryption failed:", e);
                 return null;
@@ -112,10 +114,8 @@
             });
 
             // --- JSONBin API ---
-            const loadFromBin = async (apiKey, binId) => {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-                    headers: { 'X-Master-Key': apiKey }
-                });
+            const loadFromBin = async () => {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${PUBLIC_BIN_ID}/latest`);
                 if (!response.ok) throw new Error('Erreur de chargement');
                 const result = await response.json();
                 return result.record;
@@ -134,20 +134,19 @@
                 return response.ok;
             };
 
-            // --- Chargement Initial ---
+            // --- Chargement Initial (Public) ---
             useEffect(() => {
-                if (!creds) return;
                 const loadData = async () => {
                     setIsLoading(true);
                     try {
-                        const data = await loadFromBin(creds.apiKey, creds.binId);
+                        const data = await loadFromBin();
                         setAnimals(data.animals || []);
                         setMinRequired(data.minRequired || 7);
                         setCohorts(data.cohorts || ['Cohorte 1']);
                         setCurrentCohort(data.currentCohort || 'Cohorte 1');
                         setGroupNames(data.groupNames || getDefaultData().groupNames);
                         setGenotypes(data.genotypes || getDefaultData().genotypes);
-                        setSyncStatus('✅ Connecté');
+                        setSyncStatus('✅ Connecté (Lecture)');
                     } catch (e) {
                         console.error('Load error:', e);
                         setSyncStatus('❌ Erreur de connexion');
@@ -157,7 +156,7 @@
                     }
                 };
                 loadData();
-            }, [creds]);
+            }, []);
 
             // --- Sauvegarde ---
             const saveData = useCallback(async (dataOverride) => {

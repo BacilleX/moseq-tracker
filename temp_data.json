@@ -1,0 +1,607 @@
+{
+    "animals": [
+        {
+            "id": 1767623038417,
+            "name": "79",
+            "customId": "",
+            "genotype": "J20",
+            "group": "C (Alz mCit)",
+            "cohort": "J6-2",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623055731,
+            "name": "80",
+            "customId": "",
+            "genotype": "J20",
+            "group": "C (Alz mCit)",
+            "cohort": "J6-2",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623061280,
+            "name": "81",
+            "customId": "",
+            "genotype": "J20",
+            "group": "C (Alz mCit)",
+            "cohort": "J6-2",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623070800,
+            "name": "74",
+            "customId": "",
+            "genotype": "J20",
+            "group": "D (Alz Scn1a)",
+            "cohort": "J6-2",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623079798,
+            "name": "75",
+            "customId": "",
+            "genotype": "J20",
+            "group": "D (Alz Scn1a)",
+            "cohort": "J6-2",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623081964,
+            "name": "76",
+            "customId": "",
+            "genotype": "J20",
+            "group": "D (Alz Scn1a)",
+            "cohort": "J6-2",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623084314,
+            "name": "77",
+            "customId": "",
+            "genotype": "J20",
+            "group": "D (Alz Scn1a)",
+            "cohort": "J6-2",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623244414,
+            "name": "167",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623254963,
+            "name": "168",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623263432,
+            "name": "171",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623267713,
+            "name": "172",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623272330,
+            "name": "166",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623276314,
+            "name": "170",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623281631,
+            "name": "162",
+            "genotype": "5XFAD",
+            "group": "B (WT Scn1a)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623287997,
+            "name": "164",
+            "genotype": "5XFAD",
+            "group": "B (WT Scn1a)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623295598,
+            "name": "159",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623300630,
+            "name": "161",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623308163,
+            "name": "169",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623312947,
+            "name": "157",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623334213,
+            "name": "158",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767623338381,
+            "name": "163",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X5-3",
+            "tests": {
+                "4 mois": false,
+                "5 mois": false,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624497902,
+            "name": "227",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X1-5",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624504032,
+            "name": "228",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X1-5",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624508934,
+            "name": "230",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X1-5",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624513749,
+            "name": "225",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X1-5",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624520869,
+            "name": "229",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X1-5",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624550631,
+            "name": "223",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X6-1",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624563603,
+            "name": "220",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X6-1",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624567450,
+            "name": "224",
+            "genotype": "5XFAD",
+            "group": "B (WT Scn1a)",
+            "cohort": "X6-1",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624572533,
+            "name": "221",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X6-1",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624577204,
+            "name": "226",
+            "genotype": "5XFAD",
+            "group": "B (WT Scn1a)",
+            "cohort": "X6-1",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624581787,
+            "name": "222",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X6-1",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624586168,
+            "name": "217",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X6-1",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624590299,
+            "name": "218",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X6-1",
+            "tests": {
+                "4 mois": true,
+                "5 mois": false,
+                "6 mois": false
+            }
+        },
+        {
+            "id": 1767624616587,
+            "name": "211",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X1-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624621455,
+            "name": "204",
+            "genotype": "5XFAD",
+            "group": "D (Alz Scn1a)",
+            "cohort": "X1-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624643167,
+            "name": "201",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X1-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624647734,
+            "name": "205",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X1-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624650683,
+            "name": "206",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X1-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624653919,
+            "name": "212",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X1-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624659485,
+            "name": "213",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X1-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624664922,
+            "name": "215",
+            "genotype": "5XFAD",
+            "group": "B (WT Scn1a)",
+            "cohort": "X1-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624681368,
+            "name": "193",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X5-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624685870,
+            "name": "198",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X5-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624689052,
+            "name": "196",
+            "genotype": "5XFAD",
+            "group": "A (WT mCit)",
+            "cohort": "X5-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624693102,
+            "name": "202",
+            "genotype": "5XFAD",
+            "group": "B (WT Scn1a)",
+            "cohort": "X5-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624697190,
+            "name": "200",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X5-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        },
+        {
+            "id": 1767624700968,
+            "name": "203",
+            "genotype": "5XFAD",
+            "group": "C (Alz mCit)",
+            "cohort": "X5-4",
+            "tests": {
+                "4 mois": true,
+                "5 mois": true,
+                "6 mois": true
+            }
+        }
+    ],
+    "minRequired": 10,
+    "cohorts": [
+        "X1-5",
+        "X6-1",
+        "J6-2",
+        "X5-4",
+        "X1-4",
+        "X5-3"
+    ],
+    "currentCohort": "X1-5",
+    "groupNames": [
+        "A (WT mCit)",
+        "B (WT Scn1a)",
+        "C (Alz mCit)",
+        "D (Alz Scn1a)"
+    ],
+    "genotypes": [
+        "5XFAD",
+        "J20"
+    ]
+}
