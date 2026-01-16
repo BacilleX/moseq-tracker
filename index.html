@@ -8,7 +8,7 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cloud.umami.is/script.js"
         data-website-id="fbd1f41c-e24e-44a4-a93c-00abb18c3038"></script>
@@ -32,7 +32,7 @@
         const CheckCircle = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
         const XCircle = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
         const AlertCircle = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
-        const Download = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>);
+
         const Plus = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>);
         const Settings = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>);
         const Cloud = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>);
@@ -299,38 +299,7 @@
                 }
             };
 
-            const exportExcel = () => {
-                const wb = XLSX.utils.book_new();
 
-                // 1. Sheet Récapitulatif
-                const recapData = [];
-                cohorts.forEach(c => {
-                    const cAnimals = animals.filter(a => a.cohort === c);
-                    const cStats = getCohortStats(cAnimals);
-                    groupNames.forEach(g => {
-                        const row = { 'Cohorte': c, 'Groupe': g };
-                        ages.forEach(age => {
-                            const d = cStats[g][age];
-                            row[`${age} (Testés)`] = d.tested;
-                            row[`${age} (Manquants)`] = d.missing;
-                        });
-                        recapData.push(row);
-                    });
-                });
-                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(recapData), "Récapitulatif");
-
-                // 2. Sheets par Cohorte
-                cohorts.forEach(c => {
-                    const list = animals.filter(a => a.cohort === c).map(a => ({
-                        'ID': a.name, 'Genotype': a.genotype, 'Groupe': a.group,
-                        '4 mois': a.tests['4 mois'] ? 'Oui' : 'Non',
-                        '5 mois': a.tests['5 mois'] ? 'Oui' : 'Non',
-                        '6 mois': a.tests['6 mois'] ? 'Oui' : 'Non'
-                    }));
-                    if (list.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list), c.substring(0, 20));
-                });
-                XLSX.writeFile(wb, `moseq_${new Date().toISOString().split('T')[0]}.xlsx`);
-            };
 
             const handleUnlock = async () => {
                 setUnlockError('');
@@ -398,9 +367,7 @@
                                         </button>
                                     </>
                                 )}
-                                <button onClick={exportExcel} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center gap-1">
-                                    <Download className="w-4 h-4" /> Excel
-                                </button>
+
                             </div>
                         </div>
 
