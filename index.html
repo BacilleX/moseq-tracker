@@ -301,6 +301,64 @@
 
 
 
+            // --- Backup / Restore ---
+            const downloadBackup = () => {
+                const data = {
+                    animals,
+                    minRequired,
+                    cohorts,
+                    currentCohort,
+                    groupNames,
+                    genotypes,
+                    backupDate: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `moseq_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+
+            const handleRestore = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (!confirm("⚠️ ATTENTION : La restauration va écraser TOUTES les données actuelles par celles du fichier. Continuer ?")) {
+                    e.target.value = ''; // Reset input
+                    return;
+                }
+
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+
+                    // Basic validation
+                    if (!data.cohorts || !data.animals || !Array.isArray(data.cohorts)) {
+                        throw new Error("Format de fichier invalide");
+                    }
+
+                    // Update State
+                    updateAndSave({
+                        animals: data.animals || [],
+                        minRequired: data.minRequired || 7,
+                        cohorts: data.cohorts || ['Cohorte 1'],
+                        currentCohort: data.currentCohort || 'Cohorte 1',
+                        groupNames: data.groupNames || getDefaultData().groupNames,
+                        genotypes: data.genotypes || getDefaultData().genotypes
+                    });
+
+                    alert("✅ Sauvegarde restaurée avec succès !");
+                } catch (err) {
+                    console.error(err);
+                    alert("❌ Erreur lors de la lecture du fichier de sauvegarde.");
+                }
+                e.target.value = ''; // Reset input
+            };
+
             const handleUnlock = async () => {
                 setUnlockError('');
                 const decrypted = await getDecryptedCreds(passwordInput);
@@ -367,7 +425,13 @@
                                         </button>
                                     </>
                                 )}
-
+                                <button onClick={downloadBackup} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-1" title="Télécharger une sauvegarde">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-4 4m0 0l-4-4m4 4V4" /></svg> Backup
+                                </button>
+                                <label className="cursor-pointer px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium flex items-center gap-1" title="Restaurer une sauvegarde">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> Restaurer
+                                    <input type="file" accept=".json" onChange={handleRestore} className="hidden" />
+                                </label>
                             </div>
                         </div>
 
