@@ -27,10 +27,10 @@
 
         // --- Sécurité & Configuration (Chiffré) ---
         const PUBLIC_BIN_ID = "6962e441ae596e708fd36ea2"; // Lecture OK (Public)
-        const ENCRYPTED_CFG = "jTE4XLGqHYCisW2VMh8Mhp5ZJgJAJYvR38kaoVovC34oB9vHu0rxi0CnGgTI9WpgnjRJbMYKQxED3ZaXNUtn9b9r586W0bKSnQ=="; // Seule la clé API est chiffrée
-        const AUTH_TAG = "+q3p82q8kx77mj9Oryw6ZA==";
-        const SALT = "3sT8+QzctutqrLpmN1rZMA==";
-        const IV_BASE64 = "HhxitDGX03DeALeY";
+        const ENCRYPTED_CFG = "Fyl61Wi1ZjEH/0wfYqN2h26hfy5Tl9O3KJXrflWMJHytSSSLUsORq631WxX2b0K9Bdxo5Wc9KOtvBu/yELHZZak5isBVsPSF3w=="; // Seule la clé API est chiffrée
+        const AUTH_TAG = "8DWXsqIrSiOc9mOKpuT3pQ==";
+        const SALT = "FvHDG7fne5OPmm+N4zH6yw==";
+        const IV_BASE64 = "d0V+Buf9UyjsBICN";
 
         // --- Composants SVG ---
         const CheckCircle = ({ className }) => (<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
@@ -55,7 +55,7 @@
 
                 const salt = fromBase64(SALT);
                 const key = await crypto.subtle.deriveKey(
-                    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+                    { name: "PBKDF2", salt, iterations: 600000, hash: "SHA-256" },
                     keyMaterial,
                     { name: "AES-GCM", length: 256 },
                     false,
