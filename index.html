@@ -275,6 +275,12 @@
                 }
             };
 
+            const updateAnimalField = (id, field, value) => {
+                updateAndSave({
+                    animals: animals.map(a => a.id === id ? { ...a, [field]: value } : a)
+                });
+            };
+
             const addCohort = () => {
                 const name = prompt("Nom de la cohorte :");
                 if (name && !cohorts.includes(name.trim())) {
@@ -601,14 +607,57 @@
                                     <tbody>
                                         {currentAnimals.map(a => (
                                             <tr key={a.id} className="hover:bg-gray-50">
-                                                <td className="border p-2 font-medium">{a.name}</td>
-                                                <td className="border p-2 text-center">
-                                                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${a.sex === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}`}>
-                                                        {a.sex || '?'}
-                                                    </span>
+                                                <td className="border p-2 font-medium">
+                                                    {isLocked ? a.name : (
+                                                        <input
+                                                            value={a.name}
+                                                            onChange={(e) => updateAnimalField(a.id, 'name', e.target.value)}
+                                                            className="border p-1 w-full rounded"
+                                                        />
+                                                    )}
                                                 </td>
-                                                <td className="border p-2 text-center"><span className="bg-gray-100 px-2 py-0.5 rounded text-xs">{a.genotype}</span></td>
-                                                <td className="border p-2">{a.group}</td>
+                                                <td className="border p-2 text-center">
+                                                    {isLocked ? (
+                                                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${a.sex === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                            {a.sex || '?'}
+                                                        </span>
+                                                    ) : (
+                                                        <select
+                                                            value={a.sex || 'M'}
+                                                            onChange={(e) => updateAnimalField(a.id, 'sex', e.target.value)}
+                                                            className="border p-1 rounded text-sm bg-white"
+                                                        >
+                                                            <option value="M">M</option>
+                                                            <option value="F">F</option>
+                                                        </select>
+                                                    )}
+                                                </td>
+                                                <td className="border p-2 text-center">
+                                                    {isLocked ? (
+                                                        <span className="bg-gray-100 px-2 py-0.5 rounded text-xs">{a.genotype}</span>
+                                                    ) : (
+                                                        <select
+                                                            value={a.genotype}
+                                                            onChange={(e) => updateAnimalField(a.id, 'genotype', e.target.value)}
+                                                            className="border p-1 rounded text-sm bg-white max-w-[100px]"
+                                                        >
+                                                            {genotypes.map(g => <option key={g} value={g}>{g}</option>)}
+                                                        </select>
+                                                    )}
+                                                </td>
+                                                <td className="border p-2">
+                                                    {isLocked ? (
+                                                        a.group
+                                                    ) : (
+                                                        <select
+                                                            value={a.group}
+                                                            onChange={(e) => updateAnimalField(a.id, 'group', e.target.value)}
+                                                            className="border p-1 rounded text-sm bg-white w-full"
+                                                        >
+                                                            {groupNames.map(g => <option key={g} value={g}>{g}</option>)}
+                                                        </select>
+                                                    )}
+                                                </td>
                                                 {ages.map(age => (
                                                     <td key={age} className="border p-2 text-center">
                                                         <button disabled={isLocked} onClick={() => toggleTest(a.id, age)} className={`w-6 h-6 rounded ${a.tests[age] ? 'bg-green-500 text-white' : 'bg-gray-200 hover:bg-gray-300'} disabled:opacity-50 disabled:cursor-not-allowed`}>{a.tests[age] && '✓'}</button>
