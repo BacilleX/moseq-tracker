@@ -100,6 +100,7 @@
             const [groupNames, setGroupNames] = useState(['Groupe 1', 'Groupe 2', 'Groupe 3', 'Groupe 4', 'Groupe 5', 'Groupe 6']);
             const [genotypes, setGenotypes] = useState(['Génotype 1', 'Génotype 2']);
             const [cohortDescriptions, setCohortDescriptions] = useState({});
+            const [localDescription, setLocalDescription] = useState('');
 
             const [newAnimal, setNewAnimal] = useState({ name: '', sex: 'M', genotype: 0, group: 0 });
             const [isLoading, setIsLoading] = useState(false);
@@ -189,6 +190,7 @@
                         setGroupNames(data.groupNames || getDefaultData().groupNames);
                         setGenotypes(data.genotypes || getDefaultData().genotypes);
                         setCohortDescriptions(data.cohortDescriptions || {});
+                        setLocalDescription((data.cohortDescriptions || {})[data.currentCohort || 'Cohorte 1'] || '');
                         setSyncStatus('✅ Connecté (Lecture)');
                     } catch (e) {
                         console.error('Load error:', e);
@@ -223,7 +225,10 @@
                 if (updates.animals !== undefined) setAnimals(updates.animals);
                 if (updates.minRequired !== undefined) setMinRequired(updates.minRequired);
                 if (updates.cohorts !== undefined) setCohorts(updates.cohorts);
-                if (updates.currentCohort !== undefined) setCurrentCohort(updates.currentCohort);
+                if (updates.currentCohort !== undefined) {
+                    setCurrentCohort(updates.currentCohort);
+                    setLocalDescription(cohortDescriptions[updates.currentCohort] || '');
+                }
                 if (updates.groupNames !== undefined) setGroupNames(updates.groupNames);
                 if (updates.genotypes !== undefined) setGenotypes(updates.genotypes);
                 if (updates.cohortDescriptions !== undefined) setCohortDescriptions(updates.cohortDescriptions);
@@ -381,6 +386,7 @@
                         genotypes: data.genotypes || getDefaultData().genotypes,
                         cohortDescriptions: data.cohortDescriptions || {}
                     });
+                    setLocalDescription((data.cohortDescriptions || {})[data.currentCohort || 'Cohorte 1'] || '');
 
                     alert("✅ Sauvegarde restaurée avec succès !");
                 } catch (err) {
@@ -512,12 +518,22 @@
                                     {cohortDescriptions[currentCohort] || <span className="text-gray-400 italic">Aucune description</span>}
                                 </p>
                             ) : (
-                                <textarea
-                                    value={cohortDescriptions[currentCohort] || ''}
-                                    onChange={(e) => updateAndSave({ cohortDescriptions: { ...cohortDescriptions, [currentCohort]: e.target.value } })}
-                                    className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-y min-h-[80px]"
-                                    placeholder="Ajouter une description ou des notes pour cette cohorte..."
-                                />
+                                <div>
+                                    <textarea
+                                        value={localDescription}
+                                        onChange={(e) => setLocalDescription(e.target.value)}
+                                        className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-y min-h-[80px]"
+                                        placeholder="Ajouter une description ou des notes pour cette cohorte..."
+                                    />
+                                    <div className="flex justify-end mt-2">
+                                        <button
+                                            onClick={() => updateAndSave({ cohortDescriptions: { ...cohortDescriptions, [currentCohort]: localDescription } })}
+                                            className="px-4 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-medium text-sm transition"
+                                        >
+                                            Sauvegarder la description
+                                        </button>
+                                    </div>
+                                </div>
                             )}
                         </div>
 
