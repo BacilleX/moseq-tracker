@@ -397,11 +397,16 @@
             };
 
             const downloadGlobalRecap = () => {
-                let csvContent = "Cohorte,Groupe,Age,Testes,Manquants,Statut\n";
+                let csvContent = "Cohorte,Description,Groupe,Age,Testes,Manquants,Statut\n";
 
                 cohorts.forEach(c => {
                     const cAnimals = animals.filter(a => a.cohort === c);
                     const cStats = getCohortStats(cAnimals);
+
+                    // Fetch and sanitize description
+                    let desc = cohortDescriptions[c] || "";
+                    // Replace newlines with spaces and double quotes with single quotes to avoid CSV breaking
+                    desc = desc.replace(/\n|\r/g, " ").replace(/"/g, "'").replace(/,/g, " ");
 
                     groupNames.forEach(g => {
                         ages.forEach(a => {
@@ -411,7 +416,7 @@
                             // Escape commas in case group names or cohort names have them
                             const safeCohort = c.replace(/,/g, ' ');
                             const safeGroup = g.replace(/,/g, ' ');
-                            csvContent += `${safeCohort},${safeGroup},${a},${d.tested},${d.missing},${statusFr}\n`;
+                            csvContent += `${safeCohort},${desc},${safeGroup},${a},${d.tested},${d.missing},${statusFr}\n`;
                         });
                     });
                 });
