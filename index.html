@@ -98,6 +98,7 @@
             const [currentCohort, setCurrentCohort] = useState('Cohorte 1');
             const [groupNames, setGroupNames] = useState(['Groupe 1', 'Groupe 2', 'Groupe 3', 'Groupe 4', 'Groupe 5', 'Groupe 6']);
             const [genotypes, setGenotypes] = useState(['Génotype 1', 'Génotype 2']);
+            const [cohortDescriptions, setCohortDescriptions] = useState({});
 
             const [newAnimal, setNewAnimal] = useState({ name: '', sex: 'M', genotype: 0, group: 0 });
             const [isLoading, setIsLoading] = useState(false);
@@ -149,7 +150,8 @@
                 cohorts: ['Cohorte 1'],
                 currentCohort: 'Cohorte 1',
                 groupNames: ['Groupe 1', 'Groupe 2', 'Groupe 3', 'Groupe 4', 'Groupe 5', 'Groupe 6'],
-                genotypes: ['Génotype 1', 'Génotype 2']
+                genotypes: ['Génotype 1', 'Génotype 2'],
+                cohortDescriptions: {}
             });
 
             // --- JSONBin API ---
@@ -185,6 +187,7 @@
                         setCurrentCohort(data.currentCohort || 'Cohorte 1');
                         setGroupNames(data.groupNames || getDefaultData().groupNames);
                         setGenotypes(data.genotypes || getDefaultData().genotypes);
+                        setCohortDescriptions(data.cohortDescriptions || {});
                         setSyncStatus('✅ Connecté (Lecture)');
                     } catch (e) {
                         console.error('Load error:', e);
@@ -202,7 +205,7 @@
                 setIsSaving(true);
                 setSyncStatus('☁️ Sauvegarde...');
 
-                const data = dataOverride || { animals, minRequired, cohorts, currentCohort, groupNames, genotypes };
+                const data = dataOverride || { animals, minRequired, cohorts, currentCohort, groupNames, genotypes, cohortDescriptions };
 
                 try {
                     await saveToBin(data, creds.apiKey, creds.binId);
@@ -212,16 +215,17 @@
                 }
                 setIsSaving(false);
                 setTimeout(() => setSyncStatus(''), 2000);
-            }, [animals, minRequired, cohorts, currentCohort, groupNames, genotypes, creds]);
+            }, [animals, minRequired, cohorts, currentCohort, groupNames, genotypes, cohortDescriptions, creds]);
 
             const updateAndSave = (updates) => {
-                const newState = { animals, minRequired, cohorts, currentCohort, groupNames, genotypes, ...updates };
+                const newState = { animals, minRequired, cohorts, currentCohort, groupNames, genotypes, cohortDescriptions, ...updates };
                 if (updates.animals !== undefined) setAnimals(updates.animals);
                 if (updates.minRequired !== undefined) setMinRequired(updates.minRequired);
                 if (updates.cohorts !== undefined) setCohorts(updates.cohorts);
                 if (updates.currentCohort !== undefined) setCurrentCohort(updates.currentCohort);
                 if (updates.groupNames !== undefined) setGroupNames(updates.groupNames);
                 if (updates.genotypes !== undefined) setGenotypes(updates.genotypes);
+                if (updates.cohortDescriptions !== undefined) setCohortDescriptions(updates.cohortDescriptions);
 
                 setTimeout(() => saveData(newState), 100);
             };
@@ -293,9 +297,15 @@
                 if (newName && newName.trim() !== oldName && !cohorts.includes(newName.trim())) {
                     const newCohorts = cohorts.map(c => c === oldName ? newName.trim() : c);
                     const newAnimals = animals.map(a => a.cohort === oldName ? { ...a, cohort: newName.trim() } : a);
+                    const newDescriptions = { ...cohortDescriptions };
+                    if (newDescriptions[oldName] !== undefined) {
+                        newDescriptions[newName.trim()] = newDescriptions[oldName];
+                        delete newDescriptions[oldName];
+                    }
                     updateAndSave({
                         cohorts: newCohorts,
                         animals: newAnimals,
+                        cohortDescriptions: newDescriptions,
                         currentCohort: currentCohort === oldName ? newName.trim() : currentCohort
                     });
                 }
@@ -304,9 +314,12 @@
             const removeCohort = (c) => {
                 if (cohorts.length > 1 && confirm(`Supprimer ${c} et tous ses animaux ?`)) {
                     const newC = cohorts.filter(x => x !== c);
+                    const newDescriptions = { ...cohortDescriptions };
+                    delete newDescriptions[c];
                     updateAndSave({
                         cohorts: newC,
                         animals: animals.filter(a => a.cohort !== c),
+                        cohortDescriptions: newDescriptions,
                         currentCohort: currentCohort === c ? newC[0] : currentCohort
                     });
                 }
@@ -323,6 +336,7 @@
                     currentCohort,
                     groupNames,
                     genotypes,
+                    cohortDescriptions,
                     backupDate: new Date().toISOString()
                 };
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -362,7 +376,8 @@
                         cohorts: data.cohorts || ['Cohorte 1'],
                         currentCohort: data.currentCohort || 'Cohorte 1',
                         groupNames: data.groupNames || getDefaultData().groupNames,
-                        genotypes: data.genotypes || getDefaultData().genotypes
+                        genotypes: data.genotypes || getDefaultData().genotypes,
+                        cohortDescriptions: data.cohortDescriptions || {}
                     });
 
                     alert("✅ Sauvegarde restaurée avec succès !");
@@ -485,7 +500,22 @@
                             </div>
                         </div>
 
-
+                        {/* Description Cohorte */}
+                        <div className="bg-white p-4 rounded-lg shadow mb-6">
+                            <h2 className="text-sm font-bold text-gray-500 uppercase mb-2">Description - {currentCohort}</h2>
+                            {isLocked ? (
+                                <p className="text-gray-700 whitespace-pre-wrap text-sm">
+                                    {cohortDescriptions[currentCohort] || <span className="text-gray-400 italic">Aucune description</span>}
+                                </p>
+                            ) : (
+                                <textarea
+                                    value={cohortDescriptions[currentCohort] || ''}
+                                    onChange={(e) => updateAndSave({ cohortDescriptions: { ...cohortDescriptions, [currentCohort]: e.target.value } })}
+                                    className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-y min-h-[80px]"
+                                    placeholder="Ajouter une description ou des notes pour cette cohorte..."
+                                />
+                            )}
+                        </div>
 
                         {/* Config */}
                         <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6">
