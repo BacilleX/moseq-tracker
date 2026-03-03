@@ -25,7 +25,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useMemo, useEffect, useCallback } = React;
+        const { useState, useMemo, useEffect, useCallback, useRef } = React;
 
         // --- Sécurité & Configuration (Chiffré) ---
         const PUBLIC_BIN_ID = "6962e441ae596e708fd36ea2"; // Lecture OK (Public)
@@ -91,6 +91,7 @@
         const App = () => {
             const ages = ['4 mois', '5 mois', '6 mois'];
             const [creds, setCreds] = useState(null);
+            const saveTimeoutRef = useRef(null);
             // --- State ---
             const [animals, setAnimals] = useState([]);
             const [minRequired, setMinRequired] = useState(7);
@@ -227,7 +228,8 @@
                 if (updates.genotypes !== undefined) setGenotypes(updates.genotypes);
                 if (updates.cohortDescriptions !== undefined) setCohortDescriptions(updates.cohortDescriptions);
 
-                setTimeout(() => saveData(newState), 100);
+                if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+                saveTimeoutRef.current = setTimeout(() => saveData(newState), 1000);
             };
 
             // --- Derived State ---
@@ -437,7 +439,9 @@
                                         <Cloud className="w-3 h-3" /> Cloud
                                     </span>
                                 </h1>
-                                {syncStatus && <p className="text-sm text-blue-600 mt-1">{syncStatus}</p>}
+                                <p className="text-sm text-blue-600 mt-1 min-h-[20px] transition-opacity duration-300" style={{ opacity: syncStatus ? 1 : 0 }}>
+                                    {syncStatus || ' '}
+                                </p>
                             </div>
                             <div className="flex gap-2 flex-wrap">
                                 {isLocked ? (
@@ -718,6 +722,12 @@
                                                 return (
                                                     <div key={c} className="border-b last:border-0 pb-6 last:pb-0">
                                                         <h3 className="font-bold text-md mb-3 text-blue-800 bg-blue-50 px-3 py-1 rounded inline-block">{c}</h3>
+                                                        {cohortDescriptions[c] && (
+                                                            <div className="mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-100">
+                                                                <h4 className="text-xs font-bold text-yellow-800 uppercase mb-1">Description</h4>
+                                                                <p className="text-gray-700 text-sm whitespace-pre-wrap">{cohortDescriptions[c]}</p>
+                                                            </div>
+                                                        )}
                                                         <div className="overflow-x-auto">
                                                             <table className="w-full border-collapse text-sm">
                                                                 <thead>

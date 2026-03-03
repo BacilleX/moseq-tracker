@@ -13,7 +13,8 @@ Je voulais **suivre mes cohortes de souris** sans me prendre la tête.
 
 Pour résoudre ça, j'ai construit une petite application web à l'aide de l'IA Gemini 3 Pro (High):
 1.  **Interface Simple** : J'ai fait une page unique (`index.html`) pour que ce soit léger.
-2.  **Données** : J'ai utilisé **JSONBin.io** pour la base de données sous forme de fichier json : c'est gratuit et facile d'utilisation.
+2.  **Notes et Descriptions** : J'ai ajouté la possibilité de lier des notes / descriptions spécifiques à chaque cohorte afin de centraliser le suivi.
+3.  **Données** : J'ai utilisé **JSONBin.io** pour la base de données sous forme de fichier json : c'est gratuit et facile d'utilisation.
 3.  **Sécurité** : Je ne voulais pas que n'importe qui modifie mes données, donc j'ai mis un système de **verrouillage par mot de passe**.
     - Tant que  le mot de passe n'est pas rentré, l'app est en "Lecture Seule".
     - La clé secrète liée à l'API pour modifier les données est chiffrée : le navigateur ne peut la lire que si le bon mot de passe est rentré.
