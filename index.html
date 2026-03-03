@@ -397,7 +397,8 @@
             };
 
             const downloadGlobalRecap = () => {
-                let csvContent = "Cohorte,Description,Groupe,Age,Testes,Manquants,Statut\n";
+                // Utilisation du BOM \uFEFF pour forcer Excel à lire en UTF-8, et point-virgule comme séparateur pour Excel en français
+                let csvContent = "\uFEFFCohorte;Description;Groupe;Âge;Testés;Manquants;Statut\n";
 
                 cohorts.forEach(c => {
                     const cAnimals = animals.filter(a => a.cohort === c);
@@ -405,18 +406,18 @@
 
                     // Fetch and sanitize description
                     let desc = cohortDescriptions[c] || "";
-                    // Replace newlines with spaces and double quotes with single quotes to avoid CSV breaking
-                    desc = desc.replace(/\n|\r/g, " ").replace(/"/g, "'").replace(/,/g, " ");
+                    // Remove newlines and semicolons from description to avoid CSV breaking
+                    desc = desc.replace(/\n|\r/g, " ").replace(/"/g, "'").replace(/;/g, ",");
 
                     groupNames.forEach(g => {
                         ages.forEach(a => {
                             const d = cStats[g][a];
                             // Translate status to French for the CSV
                             const statusFr = d.status === 'complete' ? 'Complet' : d.status === 'partial' ? 'Partiel' : 'Aucun';
-                            // Escape commas in case group names or cohort names have them
-                            const safeCohort = c.replace(/,/g, ' ');
-                            const safeGroup = g.replace(/,/g, ' ');
-                            csvContent += `${safeCohort},${desc},${safeGroup},${a},${d.tested},${d.missing},${statusFr}\n`;
+                            // Replace semicolons in names to avoid breaking the CSV layout
+                            const safeCohort = c.replace(/;/g, ',');
+                            const safeGroup = g.replace(/;/g, ',');
+                            csvContent += `${safeCohort};${desc};${safeGroup};${a};${d.tested};${d.missing};${statusFr}\n`;
                         });
                     });
                 });
