@@ -396,6 +396,37 @@
                 e.target.value = ''; // Reset input
             };
 
+            const downloadGlobalRecap = () => {
+                let csvContent = "Cohorte,Groupe,Age,Testes,Manquants,Statut\n";
+
+                cohorts.forEach(c => {
+                    const cAnimals = animals.filter(a => a.cohort === c);
+                    const cStats = getCohortStats(cAnimals);
+
+                    groupNames.forEach(g => {
+                        ages.forEach(a => {
+                            const d = cStats[g][a];
+                            // Translate status to French for the CSV
+                            const statusFr = d.status === 'complete' ? 'Complet' : d.status === 'partial' ? 'Partiel' : 'Aucun';
+                            // Escape commas in case group names or cohort names have them
+                            const safeCohort = c.replace(/,/g, ' ');
+                            const safeGroup = g.replace(/,/g, ' ');
+                            csvContent += `${safeCohort},${safeGroup},${a},${d.tested},${d.missing},${statusFr}\n`;
+                        });
+                    });
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `moseq_recap_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+
             const handleUnlock = async () => {
                 setUnlockError('');
                 const decrypted = await getDecryptedCreds(passwordInput);
@@ -728,7 +759,13 @@
                                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
                                     <div className="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
                                         <h2 className="text-xl font-bold text-gray-800">📊 Récapitulatif Global</h2>
-                                        <button onClick={() => setShowRecap(false)} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+                                        <div className="flex items-center gap-4">
+                                            <button onClick={downloadGlobalRecap} className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center gap-1 text-sm shadow-sm transition">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                Télécharger CSV
+                                            </button>
+                                            <button onClick={() => setShowRecap(false)} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+                                        </div>
                                     </div>
                                     <div className="p-6 overflow-y-auto">
                                         <div className="space-y-8">
