@@ -108,6 +108,7 @@
             const [syncStatus, setSyncStatus] = useState('');
             const [showSettings, setShowSettings] = useState(false);
             const [showRecap, setShowRecap] = useState(false);
+            const [groupByPrefix, setGroupByPrefix] = useState(false);
             const [isLocked, setIsLocked] = useState(true);
             const [showUnlockModal, setShowUnlockModal] = useState(false);
             const [passwordInput, setPasswordInput] = useState('');
@@ -400,27 +401,46 @@
                 // Utilisation du BOM \uFEFF pour forcer Excel à lire en UTF-8, et point-virgule comme séparateur pour Excel en français
                 let csvContent = "\uFEFFCohorte;Description;Groupe;Âge;Testés;Manquants;Statut\n";
 
-                cohorts.forEach(c => {
-                    const cAnimals = animals.filter(a => a.cohort === c);
-                    const cStats = getCohortStats(cAnimals);
-
-                    // Fetch and sanitize description
-                    let desc = cohortDescriptions[c] || "";
-                    // Remove newlines and semicolons from description to avoid CSV breaking
-                    desc = desc.replace(/\n|\r/g, " ").replace(/"/g, "'").replace(/;/g, ",");
+                const processAndAppend = (cohortName, desc, animalsForGroup) => {
+                    const cStats = getCohortStats(animalsForGroup);
+                    let safeDesc = (desc || "").replace(/\n|\r/g, " ").replace(/"/g, "'").replace(/;/g, ",");
+                    const safeCohort = cohortName.replace(/;/g, ',');
 
                     groupNames.forEach(g => {
                         ages.forEach(a => {
                             const d = cStats[g][a];
-                            // Translate status to French for the CSV
                             const statusFr = d.status === 'complete' ? 'Complet' : d.status === 'partial' ? 'Partiel' : 'Aucun';
-                            // Replace semicolons in names to avoid breaking the CSV layout
-                            const safeCohort = c.replace(/;/g, ',');
                             const safeGroup = g.replace(/;/g, ',');
-                            csvContent += `${safeCohort};${desc};${safeGroup};${a};${d.tested};${d.missing};${statusFr}\n`;
+                            csvContent += `${safeCohort};${safeDesc};${safeGroup};${a};${d.tested};${d.missing};${statusFr}\n`;
                         });
                     });
-                });
+                };
+
+                if (groupByPrefix) {
+                    const groups = {};
+                    cohorts.forEach(c => {
+                        const match = c.match(/^([A-Za-z]+|[0-9]+)/);
+                        const prefix = match ? match[1].toUpperCase() : c.charAt(0).toUpperCase();
+                        const key = prefix;
+                        if (!groups[key]) groups[key] = { cohorts: [], descs: new Set(), animals: [] };
+                        groups[key].cohorts.push(c);
+                        if (cohortDescriptions[c] && cohortDescriptions[c].trim()) {
+                            groups[key].descs.add(cohortDescriptions[c].trim());
+                        }
+                        groups[key].animals = groups[key].animals.concat(animals.filter(a => a.cohort === c));
+                    });
+
+                    Object.values(groups).forEach(g => {
+                        const combinedDesc = Array.from(g.descs).join(" | ");
+                        const prefixTitle = g.cohorts[0].match(/^([A-Za-z]+|[0-9]+)/)?.[1]?.toUpperCase() || g.cohorts[0].charAt(0).toUpperCase();
+                        processAndAppend(`Préfixe ${prefixTitle} (${g.cohorts.join(" + ")})`, combinedDesc, g.animals);
+                    });
+                } else {
+                    cohorts.forEach(c => {
+                        const cAnimals = animals.filter(a => a.cohort === c);
+                        processAndAppend(c, cohortDescriptions[c], cAnimals);
+                    });
+                }
 
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
@@ -512,8 +532,8 @@
                         </div>
 
                         {/* Cohortes */}
-                        <div className="bg-white p-4 rounded-lg shadow mb-6 flex items-center gap-3 overflow-x-auto">
-                            <span className="font-bold text-sm text-gray-500 uppercase shrink-0">Cohortes</span>
+                        <div className="bg-white p-4 rounded-lg shadow mb-6 flex flex-wrap items-center gap-2 sm:gap-3">
+                            <span className="font-bold text-sm text-gray-500 uppercase w-full sm:w-auto mb-1 sm:mb-0">Cohortes</span>
                             {cohorts.map((c, i) => (
                                 <button
                                     key={c}
@@ -534,10 +554,10 @@
                             {!isLocked && (
                                 <button onClick={addCohort} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center shrink-0" title="Nouvelle cohorte"><Plus className="w-5 h-5 text-gray-600" /></button>
                             )}
-                            <button onClick={() => setShowRecap(true)} className="ml-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-sm font-medium hover:bg-indigo-100 flex items-center gap-1 shrink-0">
+                            <button onClick={() => setShowRecap(true)} className="sm:ml-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-sm font-medium hover:bg-indigo-100 flex items-center gap-1 shrink-0">
                                 📊 Vue globale
                             </button>
-                            <div className="ml-auto flex gap-2">
+                            <div className="flex-grow flex justify-end gap-3 w-full sm:w-auto">
                                 {!isLocked && (
                                     <>
                                         <button onClick={() => renameCohort(currentCohort)} className="text-xs text-blue-600 hover:underline shrink-0">Renommer</button>
@@ -763,9 +783,15 @@
                         {showRecap && (
                             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
-                                    <div className="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
-                                        <h2 className="text-xl font-bold text-gray-800">📊 Récapitulatif Global</h2>
-                                        <div className="flex items-center gap-4">
+                                    <div className="p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50 rounded-t-xl gap-4">
+                                        <div className="flex items-center gap-4 flex-wrap">
+                                            <h2 className="text-xl font-bold text-gray-800">📊 Récapitulatif Global</h2>
+                                            <label className="flex items-center gap-2 text-sm cursor-pointer bg-white px-3 py-1.5 rounded-lg border shadow-sm hover:bg-gray-50 transition">
+                                                <input type="checkbox" checked={groupByPrefix} onChange={e => setGroupByPrefix(e.target.checked)} className="rounded text-blue-600 focus:ring-blue-500" />
+                                                <span className="font-medium text-gray-700">Grouper par préfixe (ex: J, X...)</span>
+                                            </label>
+                                        </div>
+                                        <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
                                             <button onClick={downloadGlobalRecap} className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center gap-1 text-sm shadow-sm transition">
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                                 Télécharger CSV
@@ -773,51 +799,114 @@
                                             <button onClick={() => setShowRecap(false)} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
                                         </div>
                                     </div>
-                                    <div className="p-6 overflow-y-auto">
+                                    <div className="p-4 sm:p-6 overflow-y-auto">
                                         <div className="space-y-8">
-                                            {cohorts.map(c => {
-                                                const cAnimals = animals.filter(a => a.cohort === c);
-                                                const cStats = getCohortStats(cAnimals);
-                                                return (
-                                                    <div key={c} className="border-b last:border-0 pb-6 last:pb-0">
-                                                        <h3 className="font-bold text-md mb-3 text-blue-800 bg-blue-50 px-3 py-1 rounded inline-block">{c}</h3>
-                                                        {cohortDescriptions[c] && (
-                                                            <div className="mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-100">
-                                                                <h4 className="text-xs font-bold text-yellow-800 uppercase mb-1">Description</h4>
-                                                                <p className="text-gray-700 text-sm whitespace-pre-wrap">{cohortDescriptions[c]}</p>
+                                            {(() => {
+                                                if (groupByPrefix) {
+                                                    const groups = {};
+                                                    cohorts.forEach(c => {
+                                                        const match = c.match(/^([A-Za-z]+|[0-9]+)/);
+                                                        const prefix = match ? match[1].toUpperCase() : c.charAt(0).toUpperCase();
+                                                        const key = prefix;
+                                                        if (!groups[key]) groups[key] = { cohorts: [], descs: new Set(), animals: [] };
+                                                        groups[key].cohorts.push(c);
+                                                        if (cohortDescriptions[c] && cohortDescriptions[c].trim()) {
+                                                            groups[key].descs.add(cohortDescriptions[c].trim());
+                                                        }
+                                                        groups[key].animals = groups[key].animals.concat(animals.filter(a => a.cohort === c));
+                                                    });
+
+                                                    return Object.values(groups).map((g, idx) => {
+                                                        const cStats = getCohortStats(g.animals);
+                                                        const combinedCohorts = g.cohorts.join(" + ");
+                                                        const prefixTitle = g.cohorts[0].match(/^([A-Za-z]+|[0-9]+)/)?.[1]?.toUpperCase() || g.cohorts[0].charAt(0).toUpperCase();
+                                                        const combinedDesc = Array.from(g.descs).join("\n---\n");
+                                                        return (
+                                                            <div key={idx} className="border-b last:border-0 pb-6 last:pb-0">
+                                                                <h3 className="font-bold text-md mb-3 text-purple-800 bg-purple-50 px-3 py-1 rounded inline-block">Préfixe {prefixTitle} <span className="text-sm font-normal text-purple-600">({combinedCohorts})</span></h3>
+                                                                {combinedDesc && (
+                                                                    <div className="mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-100">
+                                                                        <h4 className="text-xs font-bold text-yellow-800 uppercase mb-1">Descriptions</h4>
+                                                                        <p className="text-gray-700 text-sm whitespace-pre-wrap">{combinedDesc}</p>
+                                                                    </div>
+                                                                )}
+                                                                <div className="overflow-x-auto">
+                                                                    <table className="w-full border-collapse text-sm">
+                                                                        <thead>
+                                                                            <tr className="bg-gray-100">
+                                                                                <th className="border p-2 text-left">Groupe</th>
+                                                                                {ages.map(a => <th key={a} className="border p-2 text-center" colSpan="2">{a}</th>)}
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {groupNames.map(gName => (
+                                                                                <tr key={gName} className="hover:bg-gray-50">
+                                                                                    <td className="border p-2 font-medium">{gName}</td>
+                                                                                    {ages.map(a => {
+                                                                                        const d = cStats[gName][a];
+                                                                                        return (
+                                                                                            <React.Fragment key={a}>
+                                                                                                <td className={`border p-2 text-center ${d.status === 'complete' ? 'bg-green-50 text-green-700' : d.status === 'partial' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                                                                                                    <div className="flex justify-center gap-1">{getStatusIcon(d.status)} <b>{d.tested}</b></div>
+                                                                                                </td>
+                                                                                                <td className={`border p-2 text-center font-bold ${d.missing === 0 ? 'text-green-600' : 'text-red-500'}`}>{d.missing}</td>
+                                                                                            </React.Fragment>
+                                                                                        );
+                                                                                    })}
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
-                                                        )}
-                                                        <div className="overflow-x-auto">
-                                                            <table className="w-full border-collapse text-sm">
-                                                                <thead>
-                                                                    <tr className="bg-gray-100">
-                                                                        <th className="border p-2 text-left">Groupe</th>
-                                                                        {ages.map(a => <th key={a} className="border p-2 text-center" colSpan="2">{a}</th>)}
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {groupNames.map(g => (
-                                                                        <tr key={g} className="hover:bg-gray-50">
-                                                                            <td className="border p-2 font-medium">{g}</td>
-                                                                            {ages.map(a => {
-                                                                                const d = cStats[g][a];
-                                                                                return (
-                                                                                    <React.Fragment key={a}>
-                                                                                        <td className={`border p-2 text-center ${d.status === 'complete' ? 'bg-green-50 text-green-700' : d.status === 'partial' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
-                                                                                            <div className="flex justify-center gap-1">{getStatusIcon(d.status)} <b>{d.tested}</b></div>
-                                                                                        </td>
-                                                                                        <td className={`border p-2 text-center font-bold ${d.missing === 0 ? 'text-green-600' : 'text-red-500'}`}>{d.missing}</td>
-                                                                                    </React.Fragment>
-                                                                                );
-                                                                            })}
+                                                        );
+                                                    });
+                                                }
+
+                                                return cohorts.map(c => {
+                                                    const cAnimals = animals.filter(a => a.cohort === c);
+                                                    const cStats = getCohortStats(cAnimals);
+                                                    return (
+                                                        <div key={c} className="border-b last:border-0 pb-6 last:pb-0">
+                                                            <h3 className="font-bold text-md mb-3 text-blue-800 bg-blue-50 px-3 py-1 rounded inline-block">{c}</h3>
+                                                            {cohortDescriptions[c] && (
+                                                                <div className="mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-100">
+                                                                    <h4 className="text-xs font-bold text-yellow-800 uppercase mb-1">Description</h4>
+                                                                    <p className="text-gray-700 text-sm whitespace-pre-wrap">{cohortDescriptions[c]}</p>
+                                                                </div>
+                                                            )}
+                                                            <div className="overflow-x-auto">
+                                                                <table className="w-full border-collapse text-sm">
+                                                                    <thead>
+                                                                        <tr className="bg-gray-100">
+                                                                            <th className="border p-2 text-left">Groupe</th>
+                                                                            {ages.map(a => <th key={a} className="border p-2 text-center" colSpan="2">{a}</th>)}
                                                                         </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                            </table>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {groupNames.map(g => (
+                                                                            <tr key={g} className="hover:bg-gray-50">
+                                                                                <td className="border p-2 font-medium">{g}</td>
+                                                                                {ages.map(a => {
+                                                                                    const d = cStats[g][a];
+                                                                                    return (
+                                                                                        <React.Fragment key={a}>
+                                                                                            <td className={`border p-2 text-center ${d.status === 'complete' ? 'bg-green-50 text-green-700' : d.status === 'partial' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                                                                                                <div className="flex justify-center gap-1">{getStatusIcon(d.status)} <b>{d.tested}</b></div>
+                                                                                            </td>
+                                                                                            <td className={`border p-2 text-center font-bold ${d.missing === 0 ? 'text-green-600' : 'text-red-500'}`}>{d.missing}</td>
+                                                                                        </React.Fragment>
+                                                                                    );
+                                                                                })}
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                    );
+                                                });
+                                            })()}
                                         </div>
                                     </div>
                                 </div>
