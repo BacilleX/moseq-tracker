@@ -421,19 +421,18 @@
                     cohorts.forEach(c => {
                         const match = c.match(/^([A-Za-z]+|[0-9]+)/);
                         const prefix = match ? match[1].toUpperCase() : c.charAt(0).toUpperCase();
-                        const key = prefix;
-                        if (!groups[key]) groups[key] = { cohorts: [], descs: new Set(), animals: [] };
+                        const desc = (cohortDescriptions[c] || "").trim();
+                        
+                        const key = desc === "" ? `__empty_${c}` : `${prefix}_|_${desc}`;
+                        
+                        if (!groups[key]) groups[key] = { cohorts: [], desc: desc, animals: [] };
                         groups[key].cohorts.push(c);
-                        if (cohortDescriptions[c] && cohortDescriptions[c].trim()) {
-                            groups[key].descs.add(cohortDescriptions[c].trim());
-                        }
                         groups[key].animals = groups[key].animals.concat(animals.filter(a => a.cohort === c));
                     });
 
                     Object.values(groups).forEach(g => {
-                        const combinedDesc = Array.from(g.descs).join(" | ");
                         const prefixTitle = g.cohorts[0].match(/^([A-Za-z]+|[0-9]+)/)?.[1]?.toUpperCase() || g.cohorts[0].charAt(0).toUpperCase();
-                        processAndAppend(`Préfixe ${prefixTitle} (${g.cohorts.join(" + ")})`, combinedDesc, g.animals);
+                        processAndAppend(`Préfixe ${prefixTitle} (${g.cohorts.join(" + ")})`, g.desc, g.animals);
                     });
                 } else {
                     cohorts.forEach(c => {
@@ -788,7 +787,7 @@
                                             <h2 className="text-xl font-bold text-gray-800">📊 Récapitulatif Global</h2>
                                             <label className="flex items-center gap-2 text-sm cursor-pointer bg-white px-3 py-1.5 rounded-lg border shadow-sm hover:bg-gray-50 transition">
                                                 <input type="checkbox" checked={groupByPrefix} onChange={e => setGroupByPrefix(e.target.checked)} className="rounded text-blue-600 focus:ring-blue-500" />
-                                                <span className="font-medium text-gray-700">Grouper par préfixe (ex: J, X...)</span>
+                                                <span className="font-medium text-gray-700">Grouper par préfixe et description identique</span>
                                             </label>
                                         </div>
                                         <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
@@ -807,12 +806,12 @@
                                                     cohorts.forEach(c => {
                                                         const match = c.match(/^([A-Za-z]+|[0-9]+)/);
                                                         const prefix = match ? match[1].toUpperCase() : c.charAt(0).toUpperCase();
-                                                        const key = prefix;
-                                                        if (!groups[key]) groups[key] = { cohorts: [], descs: new Set(), animals: [] };
+                                                        const desc = (cohortDescriptions[c] || "").trim();
+                                                        
+                                                        const key = desc === "" ? `__empty_${c}` : `${prefix}_|_${desc}`;
+                                                        
+                                                        if (!groups[key]) groups[key] = { cohorts: [], desc: desc, animals: [] };
                                                         groups[key].cohorts.push(c);
-                                                        if (cohortDescriptions[c] && cohortDescriptions[c].trim()) {
-                                                            groups[key].descs.add(cohortDescriptions[c].trim());
-                                                        }
                                                         groups[key].animals = groups[key].animals.concat(animals.filter(a => a.cohort === c));
                                                     });
 
@@ -820,14 +819,13 @@
                                                         const cStats = getCohortStats(g.animals);
                                                         const combinedCohorts = g.cohorts.join(" + ");
                                                         const prefixTitle = g.cohorts[0].match(/^([A-Za-z]+|[0-9]+)/)?.[1]?.toUpperCase() || g.cohorts[0].charAt(0).toUpperCase();
-                                                        const combinedDesc = Array.from(g.descs).join("\n---\n");
                                                         return (
                                                             <div key={idx} className="border-b last:border-0 pb-6 last:pb-0">
                                                                 <h3 className="font-bold text-md mb-3 text-purple-800 bg-purple-50 px-3 py-1 rounded inline-block">Préfixe {prefixTitle} <span className="text-sm font-normal text-purple-600">({combinedCohorts})</span></h3>
-                                                                {combinedDesc && (
+                                                                {g.desc && (
                                                                     <div className="mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-100">
-                                                                        <h4 className="text-xs font-bold text-yellow-800 uppercase mb-1">Descriptions</h4>
-                                                                        <p className="text-gray-700 text-sm whitespace-pre-wrap">{combinedDesc}</p>
+                                                                        <h4 className="text-xs font-bold text-yellow-800 uppercase mb-1">Description Commune</h4>
+                                                                        <p className="text-gray-700 text-sm whitespace-pre-wrap">{g.desc}</p>
                                                                     </div>
                                                                 )}
                                                                 <div className="overflow-x-auto">
